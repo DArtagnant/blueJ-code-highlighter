@@ -3,6 +3,7 @@ from pygments.lexers.jvm import JavaLexer
 from pygments.formatters import HtmlFormatter
 
 from blueJ_style import BlueJStyle
+from create_blocks import addBlocks
 
 code = """public class Main {
   int x = 5;
@@ -21,6 +22,8 @@ formatter = HtmlFormatter(linenos= True,
                           style= BlueJStyle
                           )
 result = highlight(code, lexer, formatter)
+
+result = addBlocks(result)
 
 with open("output.html", 'w') as file:
     file.write(result)
