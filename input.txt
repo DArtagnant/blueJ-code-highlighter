@@ -1,0 +1,32 @@
+/*test
+*ok
+fin*/
+public class Main {
+  int x = 5;
+  /*test
+  *a
+  */
+  public static void main(String[] args) {
+    Main myObj = new Main();//commentaire
+    System.out.println(myObj.x);
+  }
+  private static void main(String[] args) {
+    Main myObj = new Main();//commentaire
+    System.out.println(myObj.x);
+  }
+}
+
+public class Main {
+  int x = 5;
+  /*test
+  *a
+  */
+  public static void main(String[] args) {
+    Main myObj = new Main();//commentaire
+    System.out.println(myObj.x);
+  }
+  private static void main(String[] args) {
+    Main myObj = new Main();//commentaire
+    System.out.println(myObj.x);
+  }
+}

@@ -5,47 +5,20 @@ from pygments.formatters import HtmlFormatter
 from blueJ_style import BlueJStyle
 from create_blocks import detectBlocks, addBlocks
 
-code = """public class Main {
-  int x = 5;
-  /*test
-  *a
-  */
-  public static void main(String[] args) {
-    Main myObj = new Main();//commentaire
-    System.out.println(myObj.x);
-  }
-  private static void main(String[] args) {
-    Main myObj = new Main();//commentaire
-    System.out.println(myObj.x);
-  }
-}
+code =""""""
 
-public class Main {
-  int x = 5;
-  /*test
-  *a
-  */
-  public static void main(String[] args) {
-    Main myObj = new Main();//commentaire
-    System.out.println(myObj.x);
-  }
-  private static void main(String[] args) {
-    Main myObj = new Main();//commentaire
-    System.out.println(myObj.x);
-  }
-}
-"""
+with open("input.txt", "r") as file:
+    code = file.read()
 
 code = detectBlocks(code)
 
 lexer = JavaLexer()
 formatter = HtmlFormatter(noclasses= True,
-                          style= BlueJStyle
+                          style= BlueJStyle,
                           )
 result = highlight(code, lexer, formatter)
-print(result)
+#print(result)
 result = addBlocks(result)
-
 
 with open("output.html", 'w') as file:
     file.write(result)
