@@ -5,7 +5,7 @@ from pygments.formatters import HtmlFormatter
 from blueJ_style import BlueJStyle
 from create_blocks import detectBlocks, addBlocks
 
-code =""""""
+code = ""
 
 with open("input.txt", "r") as file:
     code = file.read()
@@ -17,7 +17,7 @@ formatter = HtmlFormatter(noclasses= True,
                           style= BlueJStyle,
                           )
 result = highlight(code, lexer, formatter)
-#print(result)
+print(result)
 result = addBlocks(result, remove_space=False)
 
 with open("output.html", 'w') as file:

@@ -6,7 +6,7 @@ Error, Generic, Number, Operator
 class BlueJStyle(Style):
 
     styles = {
-        Token:                  '',
+        Token:                  '#000000',
         Comment:                '#999999 bg:#ffffff',
         Comment.Multiline:      '#000099 bg:',
         Keyword:                '#660134',
