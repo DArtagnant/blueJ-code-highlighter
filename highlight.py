@@ -18,7 +18,7 @@ formatter = HtmlFormatter(noclasses= True,
                           )
 result = highlight(code, lexer, formatter)
 #print(result)
-result = addBlocks(result)
+result = addBlocks(result, remove_space=True)
 
 with open("output.html", 'w') as file:
     file.write(result)
