@@ -45,12 +45,12 @@ def detectBlocks(code):
 def addBlocks(code, remove_space):
     #<pre style="background-color: #d6bd00">
     #<span[^>]*>public<\/span>
-    code = regex_find_span(CLASS_KEYWORD_START).sub('<div style="background-color: #98FB98">', code)
+    code = regex_find_span(CLASS_KEYWORD_START).sub('<div style="background-color: #e1f8e1">', code)
     code = regex_find_span(CLASS_KEYWORD_END).sub('</div>\n', code)
 
-    code = regex_find_span(FUN_KEYWORD_START).sub('<div style="background-color: #F0E68C">  ', code)
+    code = regex_find_span(FUN_KEYWORD_START).sub('<div style="background-color: #fafab4">  ', code)
     code = regex_find_span(FUN_KEYWORD_END).sub('</div>', code)
-    code = REGEX_FIND_SPACE.sub('<span style="background-color: #98FB98">  </span>', code)
+    code = REGEX_FIND_SPACE.sub('<span style="background-color: #e1f8e1">  </span>', code)
     if remove_space:
         code = re.sub("line-height: 125%;", "line-height: 100%;", code)
     return code
