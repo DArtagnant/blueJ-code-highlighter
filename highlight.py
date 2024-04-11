@@ -39,14 +39,13 @@ public class Main {
 code = detectBlocks(code)
 
 lexer = JavaLexer()
-formatter = HtmlFormatter(linenos= True,
-                          noclasses= True,
+formatter = HtmlFormatter(noclasses= True,
                           style= BlueJStyle
                           )
 result = highlight(code, lexer, formatter)
-
-result = addBlocks(result)
 print(result)
+result = addBlocks(result)
+
 
 with open("output.html", 'w') as file:
     file.write(result)

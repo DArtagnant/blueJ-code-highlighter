@@ -8,7 +8,7 @@ class BlueJStyle(Style):
     styles = {
         Token:                  '',
         Comment:                'ansigray bg:#ffffff',
-        Comment.Multiline:      'ansiblue',
+        Comment.Multiline:      'ansiblue bg:',
         Keyword:                'ansimagenta',
         Keyword.Reserved:       'ansiyellow'
     }
