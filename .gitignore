@@ -162,3 +162,5 @@ cython_debug/
 test1.html
 test.py
 output.html
+input.txt
+test1.py
