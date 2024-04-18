@@ -34,7 +34,7 @@ Zones = {
     "funBody" : "fb",
 }
 
-def parseFromToken(tokens):
+def parseFromToken(tokens, formatter):
     htmlResult = ""
     zone = Zones["outside"]
     after_enter = False
@@ -68,7 +68,7 @@ def parseFromToken(tokens):
                     future_zone = Zones["classHeader"]
                 else:
                     future_zone = Zones["funHeader"]
-                htmlResult += htmlFromIter(actualIter, zone)
+                htmlResult += htmlFromIter(actualIter, zone, formatter)
                 actualIter.clear()
                 changed_before = True
         elif (tokenType is Token.Keyword.Declaration and
@@ -79,20 +79,20 @@ def parseFromToken(tokens):
                 future_zone = Zones["classHeader"]
             else:
                 future_zone = Zones["funHeader"]
-            htmlResult += htmlFromIter(actualIter, zone)
+            htmlResult += htmlFromIter(actualIter, zone, formatter)
             actualIter.clear()
             changed_before = True
         
         if (tokenType is Token.Punctuation and
             tokenValue == "}"):
-            htmlResult += htmlFromIter(actualIter, zone)
+            htmlResult += htmlFromIter(actualIter, zone, formatter)
             actualIter.clear()
             if depth == 2:
                 future_zone = Zones["classBody"]
-                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['funHeader'])
+                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['funHeader'], formatter)
             elif depth == 1:
                 future_zone = Zones["outside"]
-                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['classHeader'])
+                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['classHeader'], formatter)
             depth -= 1
             changed_before = True
             zone = future_zone
@@ -113,7 +113,7 @@ def parseFromToken(tokens):
                 future_zone = Zones["funBody"]
             elif zone == Zones["classHeader"]:
                 future_zone = Zones["classBody"]
-            htmlResult += htmlFromIter(actualIter, zone)
+            htmlResult += htmlFromIter(actualIter, zone, formatter)
             actualIter.clear()
             changed_before = True
         
@@ -123,7 +123,7 @@ def parseFromToken(tokens):
     return htmlResult
 
 
-def htmlFromIter(iter, zone):
+def htmlFromIter(iter, zone, formatter):
     formatted_html = ""
     if zone == Zones["classHeader"]:
         formatted_html += '<div style="background-color: #e1f8e1;">'
@@ -146,15 +146,16 @@ def htmlFromIter(iter, zone):
         pass
     return formatted_html
 
+def format_code(code):
+    lexer = JavaLexer()
+    formatter = HtmlFormatter(noclasses=True, style=BlueJStyle)
+    tokens = list(lexer.get_tokens(code))
+    return parseFromToken(tokens, formatter)
+
 if __name__ == "__main__":
     code = ""
     with open("input.txt", "r") as file:
         code = file.read()
-    
-    lexer = JavaLexer()
-    formatter = HtmlFormatter(noclasses=True, style=BlueJStyle)
-    tokens = list(lexer.get_tokens(code))
-    result_html = parseFromToken(tokens)
-
+    result_html = format_code(code)
     with open("output.html", 'w') as file:
         file.write(result_html)
