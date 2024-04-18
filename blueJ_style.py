@@ -1,7 +1,5 @@
 from pygments.style import Style
-from pygments.token import Token, Comment, Keyword, Name, String, \
-Error, Generic, Number, Operator
-
+from pygments.token import Token, Comment, Keyword, String
 
 class BlueJStyle(Style):
 
