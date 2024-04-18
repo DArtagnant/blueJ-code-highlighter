@@ -61,7 +61,7 @@ def parseFromToken(tokens, formatter):
         if tokenType is Token.Comment.Multiline:
             nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
             if (nextTokenType is Token.Keyword.Declaration and
-                (nextTokenValue == 'public' or nextTokenValue == 'private')):
+                nextTokenValue in ('public', 'private', 'protected')):
                 next2TokenType, next2TokenValue, index2 = nextNoSpaceToken(tokens, index1)
                 if (next2TokenType is Token.Keyword.Declaration and
                     next2TokenValue == 'class'):
@@ -72,7 +72,7 @@ def parseFromToken(tokens, formatter):
                 actualIter.clear()
                 changed_before = True
         elif (tokenType is Token.Keyword.Declaration and
-            (tokenValue == 'public' or tokenValue == 'private')):
+            tokenValue in ('public', 'private', 'protected')):
             nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
             if (nextTokenType is Token.Keyword.Declaration and
                 nextTokenValue == 'class'):
