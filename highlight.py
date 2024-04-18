@@ -152,10 +152,13 @@ def format_code(code):
     tokens = list(lexer.get_tokens(code))
     return parseFromToken(tokens, formatter)
 
-if __name__ == "__main__":
+def from_file(input_path, output_path):
     code = ""
-    with open("input.txt", "r") as file:
+    with open(input_path, "r") as file:
         code = file.read()
     result_html = format_code(code)
-    with open("output.html", 'w') as file:
+    with open(output_path, 'w') as file:
         file.write(result_html)
+
+if __name__ == "__main__":
+    from_file("input.txt", "output.html")
