@@ -47,8 +47,8 @@ def parseFromToken(tokens, formatter):
 
         if after_enter:
             after_enter = False
-            if all(car == " " for car in tokenValue):
-                continue
+            tokenValue = tokenValue.strip()
+            
         if changed_before:
             changed_before = False
             if tokenValue == "\n":
