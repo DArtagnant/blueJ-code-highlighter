@@ -20,7 +20,7 @@ def reformat(string_format):
     string_format = string_format.replace('</pre></div>\n', '')
     return string_format
 
-def iter_to_string(iter):
+def _iter_to_string(iter):
     s = ""
     for i in iter:
         s += i[1]
@@ -163,11 +163,29 @@ def format_code(code):
     tokens = list(lexer.get_tokens(code))
     return parseFromToken(tokens, formatter)
 
+def create_lines(nbr):
+    html = '<td style="padding:0; vertical-align:top"><div><pre>'
+    for n in range(1, nbr + 1):
+        html += f'<span>{n}</span>'
+        if n != nbr:
+            html += "\n"
+    html += "</pre></div></td>"
+    return html
+
+def add_lines(html_code):
+    html = '<table><tbody><tr>'
+    html += create_lines(html_code.count("\n"))
+    html += '<td style="padding:0; vertical-align:top"><div>'
+    html += html_code
+    html += "</div></td></tr></tbody></table>"
+    return html
+
 def from_file(input_path, output_path):
     code = ""
     with open(input_path, "r") as file:
         code = file.read()
-    result_html = format_code(code)
+    result_html = add_lines(format_code(code))
+    print(result_html)
     with open(output_path, 'w') as file:
         file.write(result_html)
 
