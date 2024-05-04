@@ -26,6 +26,17 @@ def iter_to_string(iter):
         s += i[1]
     return s
 
+def headerType(tokens, tokenType, tokenValue, index):
+    if (tokenType is Token.Keyword.Declaration and
+        tokenValue in ('public', 'private', 'protected')):
+        nextTokenType, nextTokenValue, nextIndex = nextNoSpaceToken(tokens, index)
+        if (nextTokenType is Token.Keyword.Declaration and
+            nextTokenValue == 'class'):
+            return Zones["classHeader"]
+        else:
+            return Zones["funHeader"]
+    return None
+
 Zones = {
     "outside" : "o",
     "classHeader" : "ch",
@@ -59,29 +70,19 @@ def parseFromToken(tokens, formatter):
             after_enter = True
         
         if tokenType is Token.Comment.Multiline:
-            nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
-            if (nextTokenType is Token.Keyword.Declaration and
-                nextTokenValue in ('public', 'private', 'protected')):
-                next2TokenType, next2TokenValue, index2 = nextNoSpaceToken(tokens, index1)
-                if (next2TokenType is Token.Keyword.Declaration and
-                    next2TokenValue == 'class'):
-                    future_zone = Zones["classHeader"]
-                else:
-                    future_zone = Zones["funHeader"]
+            nextHeaderType = headerType(tokens, *nextNoSpaceToken(tokens, index))
+            if nextHeaderType is not None:
+                future_zone = nextHeaderType
                 htmlResult += htmlFromIter(actualIter, zone, formatter)
                 actualIter.clear()
                 changed_before = True
-        elif (tokenType is Token.Keyword.Declaration and
-            tokenValue in ('public', 'private', 'protected')):
-            nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
-            if (nextTokenType is Token.Keyword.Declaration and
-                nextTokenValue == 'class'):
-                future_zone = Zones["classHeader"]
-            else:
-                future_zone = Zones["funHeader"]
-            htmlResult += htmlFromIter(actualIter, zone, formatter)
-            actualIter.clear()
-            changed_before = True
+        else:
+            tokenHeaderType = headerType(tokens, tokenType, tokenValue, index)
+            if tokenHeaderType is not None:
+                future_zone = tokenHeaderType
+                htmlResult += htmlFromIter(actualIter, zone, formatter)
+                actualIter.clear()
+                changed_before = True
         
         if (tokenType is Token.Punctuation and
             tokenValue == "}"):
