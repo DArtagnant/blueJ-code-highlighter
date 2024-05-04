@@ -166,7 +166,7 @@ def format_code(code):
 def create_lines(nbr):
     html = '<td style="padding:0; vertical-align:top"><div><pre>'
     for n in range(1, nbr + 1):
-        html += f'<span>{n}</span>'
+        html += f'<span style="padding-right: 5px;">{n}</span>'
         if n != nbr:
             html += "\n"
     html += "</pre></div></td>"
