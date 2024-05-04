@@ -29,12 +29,22 @@ def iter_to_string(iter):
 def headerType(tokens, tokenType, tokenValue, index):
     if (tokenType is Token.Keyword.Declaration and
         tokenValue in ('public', 'private', 'protected')):
-        nextTokenType, nextTokenValue, nextIndex = nextNoSpaceToken(tokens, index)
+        nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
         if (nextTokenType is Token.Keyword.Declaration and
             nextTokenValue == 'class'):
             return Zones["classHeader"]
         else:
-            return Zones["funHeader"]
+            next2TokenType, next2TokenValue, index2 = nextNoSpaceToken(tokens, index1)
+            if (next2TokenType is Token.Punctuation and
+                next2TokenValue == '('):
+                #in a class initializer function
+                return Zones["funHeader"]
+            else:
+                next3TokenType, next3TokenValue, _ = nextNoSpaceToken(tokens, index2)
+                if (next3TokenType is Token.Punctuation and
+                    next3TokenValue == '('):
+                    #in a method
+                    return Zones["funHeader"]
     return None
 
 Zones = {
