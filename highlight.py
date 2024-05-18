@@ -175,7 +175,7 @@ def create_lines(nbr):
 def add_lines(html_code):
     html = '<table><tbody><tr>'
     html += create_lines(html_code.count("\n"))
-    html += '<td style="padding:0; vertical-align:top"><div>'
+    html += '<td style="padding:0; vertical-align:top; text-align:left; background-color:#ffffff;"><div>'
     html += html_code
     html += "</div></td></tr></tbody></table>"
     return html
