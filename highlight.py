@@ -173,15 +173,11 @@ def create_lines(nbr):
     return html
 
 def add_lines(html_code):
-    html = '<table><tbody><tr>'
+    html = '<div style="border-radius:15px; overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><tbody><tr>'
     html += create_lines(html_code.count("\n"))
     html += '<td style="padding:0; vertical-align:top; text-align:left; background-color:#ffffff;"><div>'
     html += html_code
-    html += "</div></td></tr></tbody></table>"
-    return html
-
-def add_credits(html):
-    html += '<pre><i>formatted thanks to <a href="https://github.com/DArtagnant/blueJ-code-highlighter">DArtagnant\'s blueJ-code-highlighter</a><i></pre>'
+    html += "</div></td></tr></tbody></table></div>"
     return html
 
 def from_file(input_path, output_path, credits=True):
@@ -189,11 +185,7 @@ def from_file(input_path, output_path, credits=True):
     with open(input_path, "r") as file:
         code = file.read()
     result_html = add_lines(format_code(code))
-    if credits:
-        result_html = add_credits(result_html)
-    else:
-        print("PLEASE ADD THE FORMATTER SOURCE AND AUTHOR'S NAME")
-    print(result_html)
+    print("Export terminé")
     with open(output_path, 'w') as file:
         file.write(result_html)
 
