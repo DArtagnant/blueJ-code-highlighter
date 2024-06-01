@@ -3,7 +3,19 @@ from pygments.lexers.jvm import JavaLexer
 from pygments.formatters import HtmlFormatter
 from pygments.token import Token
 
+from enum import Enum, auto
 from blueJ_style import BlueJStyle
+
+
+class Zones(Enum):
+    outside = auto()
+    classHeader = auto()
+    classBody = auto()
+    funHeader = auto()
+    funBody = auto()
+    otherHeader = auto()
+    otherBody = auto()
+
 
 def nextNoSpaceToken(tokens, index):
     try:
@@ -32,32 +44,24 @@ def headerType(tokens, tokenType, tokenValue, index):
         nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
         if (nextTokenType is Token.Keyword.Declaration and
             nextTokenValue == 'class'):
-            return Zones["classHeader"]
+            return Zones.classHeader
         else:
             next2TokenType, next2TokenValue, index2 = nextNoSpaceToken(tokens, index1)
             if (next2TokenType is Token.Punctuation and
                 next2TokenValue == '('):
                 #in a class initializer function
-                return Zones["funHeader"]
+                return Zones.funHeader
             else:
                 next3TokenType, next3TokenValue, _ = nextNoSpaceToken(tokens, index2)
                 if (next3TokenType is Token.Punctuation and
                     next3TokenValue == '('):
                     #in a method
-                    return Zones["funHeader"]
+                    return Zones.funHeader
     return None
-
-Zones = {
-    "outside" : "o",
-    "classHeader" : "ch",
-    "classBody" : "cb",
-    "funHeader" : "fh",
-    "funBody" : "fb",
-}
 
 def parseFromToken(tokens, formatter):
     htmlResult = ""
-    zone = Zones["outside"]
+    zone = Zones.outside
     after_enter = False
     changed_before = False
     depth = 0
@@ -99,10 +103,10 @@ def parseFromToken(tokens, formatter):
             htmlResult += htmlFromIter(actualIter, zone, formatter)
             actualIter.clear()
             if depth == 2:
-                future_zone = Zones["classBody"]
+                future_zone = Zones.classBody
                 htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['funHeader'], formatter)
             elif depth == 1:
-                future_zone = Zones["outside"]
+                future_zone = Zones.outside
                 htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['classHeader'], formatter)
             depth -= 1
             changed_before = True
@@ -120,10 +124,10 @@ def parseFromToken(tokens, formatter):
             depth += 1
             if depth > 2:
                 print("WARNING: operation may be incorrect with depths greater than 2")
-            if zone == Zones["funHeader"]:
-                future_zone = Zones["funBody"]
-            elif zone == Zones["classHeader"]:
-                future_zone = Zones["classBody"]
+            if zone is Zones.funHeader:
+                future_zone = Zones.funBody
+            elif zone is Zones.classHeader:
+                future_zone = Zones.classBody
             htmlResult += htmlFromIter(actualIter, zone, formatter)
             actualIter.clear()
             changed_before = True
@@ -136,25 +140,21 @@ def parseFromToken(tokens, formatter):
 
 def htmlFromIter(iter, zone, formatter):
     formatted_html = ""
-    if zone == Zones["classHeader"]:
-        formatted_html += '<div style="background-color: #e1f8e1;">'
-    elif zone == Zones["classBody"]:
-        formatted_html += '<div style="border-left: 25px solid #e1f8e1;">'
-    elif zone == Zones["funHeader"]:
-        formatted_html += '<div style="border-left: 25px solid #e1f8e1;"><div style="background-color: #fafab4;">'
-    elif zone == Zones["funBody"]:
-        formatted_html += '<div style="border-left: 25px solid #e1f8e1;"><div style="border-left: 25px solid #fafab4;">'
-    elif zone == Zones["outside"]:
-        pass
-    else:
-        raise Exception("'zone' non-valid value")
+    match zone:
+        case Zones.classHeader: formatted_html += '<div style="background-color: #e1f8e1;">'
+        case Zones.classBody: formatted_html += '<div style="border-left: 25px solid #e1f8e1;">'
+        case Zones.funHeader: formatted_html += '<div style="border-left: 25px solid #e1f8e1;"><div style="background-color: #fafab4;">'
+        case Zones.funBody: formatted_html += '<div style="border-left: 25px solid #e1f8e1;"><div style="border-left: 25px solid #fafab4;">'
+        case Zones.outside: pass
+        case _: raise Exception("'zone' non-valid value")
+
     formatted_html += reformat(format(iter, formatter))
-    if zone == Zones["classHeader"] or zone == Zones["classBody"]:
-        formatted_html += '</div>'
-    elif zone == Zones["funHeader"] or zone == Zones["funBody"]:
-        formatted_html += '</div></div>'
-    elif zone == Zones["outside"]:
-        pass
+
+    match zone:
+        case Zones.classHeader | Zones.classBody: formatted_html += '</div>'
+        case Zones.funHeader | Zones.funBody: formatted_html += '</div></div>'
+        case Zones.outside: pass
+    
     return formatted_html
 
 def format_code(code):
