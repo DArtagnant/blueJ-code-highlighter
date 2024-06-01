@@ -16,6 +16,30 @@ class Zones(Enum):
     otherHeader = auto()
     otherBody = auto()
 
+    @property
+    def logicalFollower(self):
+        match self:
+            case Zones.outside: return Zones.outside
+            case Zones.classHeader: return Zones.classBody
+            case Zones.classBody: return Zones.classBody
+            case Zones.funHeader: return Zones.funBody
+            case Zones.funBody: return Zones.funBody
+            case Zones.otherHeader: return Zones.otherBody
+            case Zones.otherBody: return Zones.otherBody
+            case _: raise Exception("'zone' non-valid value") 
+    
+    @property
+    def logicalPreceding(self):
+        match self:
+            case Zones.outside: return Zones.outside
+            case Zones.classHeader: return Zones.classHeader
+            case Zones.classBody: return Zones.classHeader
+            case Zones.funHeader: return Zones.funHeader
+            case Zones.funBody: return Zones.funHeader
+            case Zones.otherHeader: return Zones.otherHeader
+            case Zones.otherBody: return Zones.otherHeader
+            case _: raise Exception("'zone' non-valid value") 
+
 
 def nextNoSpaceToken(tokens, index):
     try:
@@ -61,6 +85,72 @@ def headerType(tokens, tokenType, tokenValue, index):
 
 def parseFromToken(tokens, formatter):
     htmlResult = ""
+    depth = [Zones.outside]
+    memory = []
+    actualIter = []
+
+    def nextBlock(beforeZone):
+        nonlocal htmlResult, depth, memory, actualIter
+        depth.append(beforeZone)
+        htmlResult += htmlFromIter(actualIter, depth, formatter)
+        memory.clear()
+        actualIter.clear()
+    
+    def nextBlockSamePlace(newZone):
+        nonlocal htmlResult, depth, memory, actualIter
+        depth[-1] = newZone
+        htmlResult += htmlFromIter(actualIter, depth, formatter)
+        memory.clear()
+        actualIter.clear()
+    
+    def finishBlock(makeZone):
+        nonlocal htmlResult, depth, memory, actualIter
+        if not len(depth) > 1:
+            raise Exception('unfinished group')
+        depth[-1] = makeZone
+        htmlResult += htmlFromIter(actualIter, depth, formatter)
+        depth.pop()
+        memory.clear()
+        actualIter.clear()
+
+    for tokenType, tokenValue in tokens:
+        actualIter.append((tokenType, tokenValue))
+
+        #Remember
+        if tokenValue in ('public', 'private', 'protected', 'if', 'else', 'class', ';', '}', '{'):
+            memory.append(tokenValue)
+        
+        #new block identifier
+        if tokenValue == "\n":
+            if len(actualIter) == 1:
+                #this line is empty
+                nextBlockSamePlace(depth[-1].logicalFollower)
+            elif all((actualIterTokenType is Token.Comment.Single or actualIterTokenType is Token.Text.Whitespace for (actualIterTokenType, _) in actualIter)):
+                #this line has only comments
+                nextBlockSamePlace(depth[-1].logicalFollower)
+            elif ';' in memory:
+                nextBlockSamePlace(depth[-1].logicalFollower)
+            elif '{' in memory:
+                if 'if' in memory or 'else' in memory:
+                    nextBlock(Zones.otherHeader)
+                elif ('public' in memory or
+                    'private' in memory or
+                    'protected' in memory):
+                    if 'class' in memory:
+                        nextBlock(Zones.classHeader)
+                    else:
+                        nextBlock(Zones.funHeader)
+                else:
+                    raise Exception("Unknown block {")
+            elif '}' in memory:
+                finishBlock(depth[-1].logicalPreceding)
+    
+    htmlResult = '<pre>' + htmlResult + '</pre>'
+    return htmlResult
+
+
+def ancParseFromToken(tokens, formatter):
+    htmlResult = ""
     zone = Zones.outside
     after_enter = False
     changed_before = False
@@ -104,10 +194,10 @@ def parseFromToken(tokens, formatter):
             actualIter.clear()
             if depth == 2:
                 future_zone = Zones.classBody
-                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['funHeader'], formatter)
+                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones.funHeader, formatter)
             elif depth == 1:
                 future_zone = Zones.outside
-                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones['classHeader'], formatter)
+                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones.classHeader, formatter)
             depth -= 1
             changed_before = True
             zone = future_zone
@@ -138,24 +228,42 @@ def parseFromToken(tokens, formatter):
     return htmlResult
 
 
-def htmlFromIter(iter, zone, formatter):
+def htmlFromIter(iter, depth, formatter):
     formatted_html = ""
-    match zone:
-        case Zones.classHeader: formatted_html += '<div style="background-color: #e1f8e1;">'
-        case Zones.classBody: formatted_html += '<div style="border-left: 25px solid #e1f8e1;">'
-        case Zones.funHeader: formatted_html += '<div style="border-left: 25px solid #e1f8e1;"><div style="background-color: #fafab4;">'
-        case Zones.funBody: formatted_html += '<div style="border-left: 25px solid #e1f8e1;"><div style="border-left: 25px solid #fafab4;">'
-        case Zones.outside: pass
-        case _: raise Exception("'zone' non-valid value")
+    
+    for zone in depth:
+        formatted_html += getHtmlStartFor(zone)
 
     formatted_html += reformat(format(iter, formatter))
 
-    match zone:
-        case Zones.classHeader | Zones.classBody: formatted_html += '</div>'
-        case Zones.funHeader | Zones.funBody: formatted_html += '</div></div>'
-        case Zones.outside: pass
+    for zone in reversed(depth):
+        formatted_html += getHtmlEndFor(zone)
     
     return formatted_html
+
+def getHtmlStartFor(zone):
+    match zone:
+        case Zones.classHeader: return '<div style="background-color: #e1f8e1;">'
+        case Zones.classBody: return '<div style="border-left: 25px solid #e1f8e1;">'
+        case Zones.funHeader: return '<div style="background-color: #fafab4;">'
+        case Zones.funBody: return '<div style="border-left: 25px solid #fafab4;">'
+        case Zones.otherHeader: return '<div style="background-color: #e9e9f8;">'
+        case Zones.otherBody: return '<div style="border-left: 25px solid #e9e9f8;">'
+        case Zones.outside: return ''
+        case _: raise Exception(f"zone '{zone}' non-valid value")
+
+def getHtmlEndFor(zone):
+    match zone:
+        case (Zones.classHeader
+              | Zones.classBody
+              | Zones.funHeader
+              | Zones.funBody
+              | Zones.otherHeader
+              | Zones.otherBody
+              ):
+            return '</div>'
+        case Zones.outside: return ''
+        case _: raise Exception(f"zone '{zone}' non-valid value")
 
 def format_code(code):
     lexer = JavaLexer()
