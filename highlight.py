@@ -67,16 +67,6 @@ class Zones(Enum):
             case _: raise Exception(f"zone '{self}' non-valid value")
 
 
-def nextNoSpaceToken(tokens, index):
-    try:
-        nextTokenType, nextTokenValue = tokens[index + 1]
-        if nextTokenType is not Token.Text.Whitespace:
-            return nextTokenType, nextTokenValue, index + 1
-        else:
-            return nextNoSpaceToken(tokens, index + 1)
-    except IndexError:
-        return None, None, None
-
 def reformat(string_format):
     string_format = string_format.replace('<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span>', '')
     string_format = string_format.replace('</pre></div>\n', '')
@@ -87,27 +77,6 @@ def _iter_to_string(iter):
     for i in iter:
         s += i[1]
     return s
-
-def headerType(tokens, tokenType, tokenValue, index):
-    if (tokenType is Token.Keyword.Declaration and
-        tokenValue in ('public', 'private', 'protected')):
-        nextTokenType, nextTokenValue, index1 = nextNoSpaceToken(tokens, index)
-        if (nextTokenType is Token.Keyword.Declaration and
-            nextTokenValue == 'class'):
-            return Zones.classHeader
-        else:
-            next2TokenType, next2TokenValue, index2 = nextNoSpaceToken(tokens, index1)
-            if (next2TokenType is Token.Punctuation and
-                next2TokenValue == '('):
-                #in a class initializer function
-                return Zones.funHeader
-            else:
-                next3TokenType, next3TokenValue, _ = nextNoSpaceToken(tokens, index2)
-                if (next3TokenType is Token.Punctuation and
-                    next3TokenValue == '('):
-                    #in a method
-                    return Zones.funHeader
-    return None
 
 def parseFromToken(tokens, formatter):
     htmlResult = ""
@@ -171,85 +140,6 @@ def parseFromToken(tokens, formatter):
             elif '}' in memory:
                 finishBlock(depth[-1].logicalPreceding)
     
-    htmlResult = '<pre>' + htmlResult + '</pre>'
-    return htmlResult
-
-
-def ancParseFromToken(tokens, formatter):
-    htmlResult = ""
-    zone = Zones.outside
-    after_enter = False
-    changed_before = False
-    depth = 0
-
-    actualIter = []
-    for index, (tokenType, tokenValue) in enumerate(tokens):
-        future_zone = zone
-
-        if after_enter:
-            after_enter = False
-            tokenValue = tokenValue.strip()
-            
-        if changed_before:
-            changed_before = False
-            if tokenValue == "\n":
-                after_enter = True
-                continue
-        
-        if tokenValue == "\n":
-            after_enter = True
-        
-        if tokenType is Token.Comment.Multiline:
-            nextHeaderType = headerType(tokens, *nextNoSpaceToken(tokens, index))
-            if nextHeaderType is not None:
-                future_zone = nextHeaderType
-                htmlResult += htmlFromIter(actualIter, zone, formatter)
-                actualIter.clear()
-                changed_before = True
-        else:
-            tokenHeaderType = headerType(tokens, tokenType, tokenValue, index)
-            if tokenHeaderType is not None:
-                future_zone = tokenHeaderType
-                htmlResult += htmlFromIter(actualIter, zone, formatter)
-                actualIter.clear()
-                changed_before = True
-        
-        if (tokenType is Token.Punctuation and
-            tokenValue == "}"):
-            htmlResult += htmlFromIter(actualIter, zone, formatter)
-            actualIter.clear()
-            if depth == 2:
-                future_zone = Zones.classBody
-                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones.funHeader, formatter)
-            elif depth == 1:
-                future_zone = Zones.outside
-                htmlResult += htmlFromIter([(tokenType, tokenValue)], Zones.classHeader, formatter)
-            depth -= 1
-            changed_before = True
-            zone = future_zone
-            continue
-        
-        if tokenType is Token.Comment.Multiline:
-            lines = tokenValue.split("\n")
-            lines = [line.strip() for line in lines]
-            tokenValue = "\n".join(lines)
-        actualIter.append((tokenType, tokenValue))
-
-        if (tokenType is Token.Punctuation and
-            tokenValue == "{"):
-            depth += 1
-            if depth > 2:
-                print("WARNING: operation may be incorrect with depths greater than 2")
-            if zone is Zones.funHeader:
-                future_zone = Zones.funBody
-            elif zone is Zones.classHeader:
-                future_zone = Zones.classBody
-            htmlResult += htmlFromIter(actualIter, zone, formatter)
-            actualIter.clear()
-            changed_before = True
-        
-        zone = future_zone
-        
     htmlResult = '<pre>' + htmlResult + '</pre>'
     return htmlResult
 
