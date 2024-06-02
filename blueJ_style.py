@@ -1,6 +1,9 @@
+from collections.abc import Iterator
+from typing import Iterable
+from pygments.lexer import Lexer
 from pygments.style import Style
-from pygments.token import Token, Comment, Keyword, String, Name
-from pygments.filters import NameHighlightFilter
+from pygments.token import _TokenType, Token, Comment, Keyword, String, Name
+from pygments.filter import Filter
 
 class BlueJStyle(Style):
 
@@ -11,10 +14,17 @@ class BlueJStyle(Style):
         Keyword:                '#660134',
         String:                 '#066a06',
         Keyword.Type:           '#cd0b0a',
-        Name.Builtin.Pseudo:    '#1B00FF',
+        Name.Builtin.Pseudo:    '#277ba8',
     }
 
-specialKeywordFilter = NameHighlightFilter(
-    names= ['this', 'null'],
-    tokentype= Name.Builtin.Pseudo
-)
+class SpecialKeywordFilter(Filter):
+    def __init__(self, **options):
+        super().__init__(**options)
+        self.special_keywords = {'null', 'this'}
+    
+    def filter(self, lexer, stream):
+        for ttype, value in stream:
+            if value in self.special_keywords:
+                yield Name.Builtin.Pseudo, value
+            else:
+                yield ttype, value

@@ -6,7 +6,7 @@ from re import sub as re_sub
 from re import MULTILINE as re_m_flag
 
 from enum import Enum, auto
-from blueJ_style import BlueJStyle, specialKeywordFilter
+from blueJ_style import BlueJStyle, SpecialKeywordFilter
 
 
 class Zones(Enum):
@@ -163,7 +163,7 @@ def htmlFromIter(iter, depth, formatter):
     return formatted_html
 
 def add_filters(lexer):
-    lexer.add_filter(specialKeywordFilter)
+    lexer.add_filter(SpecialKeywordFilter())
     return lexer
 
 def format_code(code):
