@@ -6,7 +6,7 @@ from re import sub as re_sub
 from re import MULTILINE as re_m_flag
 
 from enum import Enum, auto
-from blueJ_style import BlueJStyle
+from blueJ_style import BlueJStyle, specialKeywordFilter
 
 
 class Zones(Enum):
@@ -113,6 +113,9 @@ def parseFromToken(tokens, formatter):
     for tokenType, tokenValue in tokens:
         actualIter.append((tokenType, tokenValue))
 
+        if tokenValue == 'this':
+            pass
+
         #Remember
         if tokenValue in ('public', 'private', 'protected', 'if', 'else', 'class', ';', '}', '{'):
             memory.append(tokenValue)
@@ -159,8 +162,13 @@ def htmlFromIter(iter, depth, formatter):
     
     return formatted_html
 
+def add_filters(lexer):
+    lexer.add_filter(specialKeywordFilter)
+    return lexer
+
 def format_code(code):
     lexer = JavaLexer()
+    lexer = add_filters(lexer)
     formatter = HtmlFormatter(noclasses=True, style=BlueJStyle)
     tokens = list(lexer.get_tokens(code))
     return parseFromToken(tokens, formatter)
