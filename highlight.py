@@ -2,6 +2,8 @@ from pygments import format
 from pygments.lexers.jvm import JavaLexer
 from pygments.formatters import HtmlFormatter
 from pygments.token import Token
+from re import sub as re_sub
+from re import MULTILINE as re_m_flag
 
 from enum import Enum, auto
 from blueJ_style import BlueJStyle
@@ -184,10 +186,14 @@ def add_credits(html):
     html += '<pre><i>formatted thanks to <a href="https://github.com/DArtagnant/blueJ-code-highlighter">DArtagnant\'s blueJ-code-highlighter</a><i></pre>'
     return html
 
+def remove_space(code):
+    return re_sub(r"^[^\S\r\n]+", "", code, flags=re_m_flag)
+
 def from_file(input_path, output_path, credits=True):
     code = ""
     with open(input_path, "r") as file:
         code = file.read()
+    code = remove_space(code)
     result_html = add_lines(format_code(code))
     if credits:
         result_html = add_credits(result_html)
