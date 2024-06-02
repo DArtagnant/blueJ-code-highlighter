@@ -38,7 +38,33 @@ class Zones(Enum):
             case Zones.funBody: return Zones.funHeader
             case Zones.otherHeader: return Zones.otherHeader
             case Zones.otherBody: return Zones.otherHeader
-            case _: raise Exception("'zone' non-valid value") 
+            case _: raise Exception(f"zone '{self}' non-valid value")
+
+    @property
+    def htmlStart(self):
+        match self:
+            case Zones.classHeader: return '<div style="background-color: #e1f8e1;">'
+            case Zones.classBody: return '<div style="border-left: 25px solid #e1f8e1;">'
+            case Zones.funHeader: return '<div style="background-color: #fafab4;">'
+            case Zones.funBody: return '<div style="border-left: 25px solid #fafab4;">'
+            case Zones.otherHeader: return '<div style="background-color: #e9e9f8;">'
+            case Zones.otherBody: return '<div style="border-left: 25px solid #e9e9f8;">'
+            case Zones.outside: return ''
+            case _: raise Exception(f"zone '{self}' non-valid value")
+    
+    @property
+    def htmlEnd(self):
+        match self:
+            case (Zones.classHeader
+                | Zones.classBody
+                | Zones.funHeader
+                | Zones.funBody
+                | Zones.otherHeader
+                | Zones.otherBody
+                ):
+                return '</div>'
+            case Zones.outside: return ''
+            case _: raise Exception(f"zone '{self}' non-valid value")
 
 
 def nextNoSpaceToken(tokens, index):
@@ -232,38 +258,14 @@ def htmlFromIter(iter, depth, formatter):
     formatted_html = ""
     
     for zone in depth:
-        formatted_html += getHtmlStartFor(zone)
+        formatted_html += zone.htmlStart
 
     formatted_html += reformat(format(iter, formatter))
 
     for zone in reversed(depth):
-        formatted_html += getHtmlEndFor(zone)
+        formatted_html += zone.htmlEnd
     
     return formatted_html
-
-def getHtmlStartFor(zone):
-    match zone:
-        case Zones.classHeader: return '<div style="background-color: #e1f8e1;">'
-        case Zones.classBody: return '<div style="border-left: 25px solid #e1f8e1;">'
-        case Zones.funHeader: return '<div style="background-color: #fafab4;">'
-        case Zones.funBody: return '<div style="border-left: 25px solid #fafab4;">'
-        case Zones.otherHeader: return '<div style="background-color: #e9e9f8;">'
-        case Zones.otherBody: return '<div style="border-left: 25px solid #e9e9f8;">'
-        case Zones.outside: return ''
-        case _: raise Exception(f"zone '{zone}' non-valid value")
-
-def getHtmlEndFor(zone):
-    match zone:
-        case (Zones.classHeader
-              | Zones.classBody
-              | Zones.funHeader
-              | Zones.funBody
-              | Zones.otherHeader
-              | Zones.otherBody
-              ):
-            return '</div>'
-        case Zones.outside: return ''
-        case _: raise Exception(f"zone '{zone}' non-valid value")
 
 def format_code(code):
     lexer = JavaLexer()
