@@ -182,8 +182,8 @@ def create_lines(nbr):
     html += "</pre></div></td>"
     return html
 
-def add_lines(html_code):
-    html = '<div style="border-radius:15px; overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><tbody><tr>'
+def add_container(html_code, border_radius=15):
+    html = f'<div style="border-radius:{border_radius}px; overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><tbody><tr>'
     html += create_lines(html_code.count("\n"))
     html += '<td style="padding:0; vertical-align:top; text-align:left; background-color:#ffffff;"><div>'
     html += html_code
@@ -197,12 +197,15 @@ def add_credits(html):
 def remove_space(code):
     return re_sub(r"^[^\S\r\n]+", "", code, flags=re_m_flag)
 
-def from_file(input_path, output_path, credits=True):
+def from_file(input_path, output_path, credits=True, border_radius=15):
     code = ""
     with open(input_path, "r") as file:
         code = file.read()
     code = remove_space(code)
-    result_html = add_lines(format_code(code))
+    result_html = add_container(
+        format_code(code),
+        border_radius=border_radius
+        )
     if credits:
         result_html = add_credits(result_html)
     else:
