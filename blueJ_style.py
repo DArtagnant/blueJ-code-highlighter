@@ -14,7 +14,7 @@ class BlueJStyle(Style):
         Keyword:                '#660134',
         String:                 '#066a06',
         Keyword.Type:           '#cd0b0a',
-        Name.Builtin.Pseudo:    '#277ba8',
+        Name.Builtin.Pseudo:    '#006699',
     }
 
 class SpecialKeywordFilter(Filter):
