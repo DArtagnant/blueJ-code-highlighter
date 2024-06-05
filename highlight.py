@@ -174,9 +174,9 @@ def format_code(code):
     return parseFromToken(tokens, formatter)
 
 def create_lines(nbr):
-    html = '<td style="padding:0; vertical-align:top; text-align:right; background-color:#bfbfbf; position: sticky; left: 0;"><div><pre>'
+    html = '<td style="padding:0; vertical-align:top; text-align:right; background-color:#bfbfbf; position: sticky; left: 0; width: 1%; white-space: nowrap;"><div><pre>'
     for n in range(1, nbr + 1):
-        html += f'<span style="padding-right: 5px;">{n}</span>'
+        html += f'<span style="padding-right: 5px; padding-left: 5px;">{n}</span>'
         if n != nbr:
             html += "\n"
     html += "</pre></div></td>"
