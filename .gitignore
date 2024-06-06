@@ -159,8 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-test1.html
-test.py
-output.html
-input.txt
-test1.py
+input*.txt
+output*.html
+test*.html
+test*.py
