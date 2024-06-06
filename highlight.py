@@ -100,6 +100,17 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
                 print("WARNING : The given code seems incomplete, "
                       + "a class indentation has been added to the isolated functions.")
                 depth.append(Zones.classBody)
+        
+        if (beforeZone is Zones.classHeader and
+            Zones.classBody in depth):
+            print("WARNING: there is a class inside a another class")
+        if (beforeZone is Zones.classHeader and
+            Zones.funBody in depth):
+            print("WARNING: there is a class inside a function")
+        if (beforeZone is Zones.funHeader and
+            Zones.funBody in depth):
+            print("WARNING: there is a function inside a another function")
+        
         depth.append(beforeZone)
         _add_and_clear()
         
