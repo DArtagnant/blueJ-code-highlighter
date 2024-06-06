@@ -103,13 +103,14 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
         memory.clear()
         actualIter.clear()
 
-    def nextBlock(beforeZone):
+    def createIndent(beforeZone):
         nonlocal depth
         if functions_always_in_class:
             if (beforeZone is Zones.funHeader and
                 Zones.classBody not in depth):
                 print("WARNING : The given code seems incomplete, "
-                      + "a class indentation has been added to the isolated functions.")
+                      + "a class indentation has been added to the isolated functions. "
+                      + "Do not mix incomplete code with classes.")
                 depth.append(Zones.classBody)
         
         if (beforeZone is Zones.classHeader and
@@ -126,17 +127,16 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
         depth.append(beforeZone)
         _add_and_clear()
         
-    def nextBlockSamePlace(newZone):
+    def transformIndent(newZone):
         nonlocal depth
         depth[-1] = newZone
         _add_and_clear()
     
-    def finishBlock(makeZone):
+    def finishIndent(makeZone):
         nonlocal depth
         if not len(depth) > 1:
             raise Exception('unfinished group')
-        depth[-1] = makeZone
-        _add_and_clear()
+        transformIndent(makeZone)
         depth.pop()
 
     for tokenType, tokenValue in tokens:
@@ -150,24 +150,24 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
         if tokenValue == "\n":
             if len(actualIter) == 1:
                 #this line is empty
-                nextBlockSamePlace(depth[-1].logicalFollower)
+                transformIndent(depth[-1].logicalFollower)
             elif all((actualIterTokenType is Token.Comment.Single or actualIterTokenType is Token.Text.Whitespace for (actualIterTokenType, _) in actualIter)):
                 #this line has only comments
-                nextBlockSamePlace(depth[-1].logicalFollower)
+                transformIndent(depth[-1].logicalFollower)
             elif ';' in memory:
-                nextBlockSamePlace(depth[-1].logicalFollower)
+                transformIndent(depth[-1].logicalFollower)
             elif '{' in memory:
                 if (java_memory_conditions | java_memory_loops) & set(memory):
-                    nextBlock(Zones.otherHeader)
+                    createIndent(Zones.otherHeader)
                 elif java_memory_protection & set(memory):
                     if 'class' in memory:
-                        nextBlock(Zones.classHeader)
+                        createIndent(Zones.classHeader)
                     else:
-                        nextBlock(Zones.funHeader)
+                        createIndent(Zones.funHeader)
                 else:
                     raise Exception("Unknown block {")
             elif '}' in memory:
-                finishBlock(depth[-1].logicalPreceding)
+                finishIndent(depth[-1].logicalPreceding)
     
     htmlResult = '<pre>' + htmlResult + '</pre>'
     return htmlResult
