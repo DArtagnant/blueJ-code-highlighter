@@ -122,6 +122,7 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
             Zones.funBody in depth):
             print("WARNING: there is a function inside a another function")
         
+        depth[-1] = depth[-1].logicalFollower
         depth.append(beforeZone)
         _add_and_clear()
         
@@ -140,9 +141,6 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
 
     for tokenType, tokenValue in tokens:
         actualIter.append((tokenType, tokenValue))
-
-        if tokenValue == 'this':
-            pass
 
         #Remember
         if tokenValue in java_memory_all_keywords:
