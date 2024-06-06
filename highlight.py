@@ -9,6 +9,17 @@ from enum import Enum, auto
 from blueJ_style import BlueJStyle, SpecialKeywordFilter
 
 
+java_memory_protection = {'public', 'private', 'protected'}
+java_memory_conditions = {'if', 'else'}
+java_memory_loops = {'for', 'while'}
+java_memory_special = {'class', ';', '}', '{'}
+java_memory_all_keywords = (
+      java_memory_protection
+    | java_memory_conditions
+    | java_memory_loops
+    | java_memory_special
+)
+
 class Zones(Enum):
     outside = auto()
     classHeader = auto()
@@ -134,7 +145,7 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
             pass
 
         #Remember
-        if tokenValue in ('public', 'private', 'protected', 'if', 'else', 'class', ';', '}', '{'):
+        if tokenValue in java_memory_all_keywords:
             memory.append(tokenValue)
         
         #new block identifier
@@ -148,11 +159,9 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
             elif ';' in memory:
                 nextBlockSamePlace(depth[-1].logicalFollower)
             elif '{' in memory:
-                if 'if' in memory or 'else' in memory:
+                if (java_memory_conditions | java_memory_loops) & set(memory):
                     nextBlock(Zones.otherHeader)
-                elif ('public' in memory or
-                    'private' in memory or
-                    'protected' in memory):
+                elif java_memory_protection & set(memory):
                     if 'class' in memory:
                         nextBlock(Zones.classHeader)
                     else:
