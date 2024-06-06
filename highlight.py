@@ -80,7 +80,7 @@ def _iter_to_string(iter):
         s += i[1]
     return s
 
-def parseFromToken(tokens, formatter):
+def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
     htmlResult = ""
     depth = [Zones.outside]
     memory = []
@@ -94,6 +94,12 @@ def parseFromToken(tokens, formatter):
 
     def nextBlock(beforeZone):
         nonlocal depth
+        if functions_always_in_class:
+            if (beforeZone is Zones.funHeader and
+                Zones.classBody not in depth):
+                print("WARNING : The given code seems incomplete, "
+                      + "a class indentation has been added to the isolated functions.")
+                depth.append(Zones.classBody)
         depth.append(beforeZone)
         _add_and_clear()
         
@@ -166,12 +172,12 @@ def add_filters(lexer):
     lexer.add_filter(SpecialKeywordFilter())
     return lexer
 
-def format_code(code):
+def format_code(code, *_, functions_always_in_class=False):
     lexer = JavaLexer()
     lexer = add_filters(lexer)
     formatter = HtmlFormatter(noclasses=True, style=BlueJStyle)
     tokens = list(lexer.get_tokens(code))
-    return parseFromToken(tokens, formatter)
+    return parseFromToken(tokens, formatter, functions_always_in_class=functions_always_in_class)
 
 def create_lines(nbr):
     html = '<td style="padding:0; vertical-align:top; text-align:right; background-color:#bfbfbf; position: sticky; left: 0; width: 1%; white-space: nowrap;"><div><pre>'
@@ -197,13 +203,16 @@ def add_credits(html):
 def remove_space(code):
     return re_sub(r"^[^\S\r\n]+", "", code, flags=re_m_flag)
 
-def from_file(input_path, output_path, credits=True, border_radius=15):
+def from_file(input_path, output_path, *_, credits=True, border_radius=15, functions_always_in_class=True):
     code = ""
     with open(input_path, "r") as file:
         code = file.read()
     code = remove_space(code)
     result_html = add_container(
-        format_code(code),
+        format_code(
+            code,
+            functions_always_in_class= functions_always_in_class,
+            ),
         border_radius=border_radius
         )
     if credits:
