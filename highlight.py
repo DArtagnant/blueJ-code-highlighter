@@ -86,29 +86,29 @@ def parseFromToken(tokens, formatter):
     memory = []
     actualIter = []
 
+    def _add_and_clear():
+        nonlocal htmlResult, depth, memory, actualIter
+        htmlResult += htmlFromIter(actualIter, depth, formatter)
+        memory.clear()
+        actualIter.clear()
+
     def nextBlock(beforeZone):
-        nonlocal htmlResult, depth, memory, actualIter
+        nonlocal depth
         depth.append(beforeZone)
-        htmlResult += htmlFromIter(actualIter, depth, formatter)
-        memory.clear()
-        actualIter.clear()
-    
+        _add_and_clear()
+        
     def nextBlockSamePlace(newZone):
-        nonlocal htmlResult, depth, memory, actualIter
+        nonlocal depth
         depth[-1] = newZone
-        htmlResult += htmlFromIter(actualIter, depth, formatter)
-        memory.clear()
-        actualIter.clear()
+        _add_and_clear()
     
     def finishBlock(makeZone):
-        nonlocal htmlResult, depth, memory, actualIter
+        nonlocal depth
         if not len(depth) > 1:
             raise Exception('unfinished group')
         depth[-1] = makeZone
-        htmlResult += htmlFromIter(actualIter, depth, formatter)
+        _add_and_clear()
         depth.pop()
-        memory.clear()
-        actualIter.clear()
 
     for tokenType, tokenValue in tokens:
         actualIter.append((tokenType, tokenValue))
