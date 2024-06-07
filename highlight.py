@@ -142,6 +142,9 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
     for tokenType, tokenValue in tokens:
         actualIter.append((tokenType, tokenValue))
 
+        if tokenValue == "for":
+            pass
+
         #Remember
         if tokenValue in java_memory_all_keywords:
             memory.append(tokenValue)
@@ -154,8 +157,6 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
             elif all((actualIterTokenType is Token.Comment.Single or actualIterTokenType is Token.Text.Whitespace for (actualIterTokenType, _) in actualIter)):
                 #this line has only comments
                 transformIndent(depth[-1].logicalFollower)
-            elif ';' in memory:
-                transformIndent(depth[-1].logicalFollower)
             elif '{' in memory:
                 if (java_memory_conditions | java_memory_loops) & set(memory):
                     createIndent(Zones.otherHeader)
@@ -166,6 +167,8 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
                         createIndent(Zones.funHeader)
                 else:
                     raise Exception("Unknown block {")
+            elif ';' in memory:
+                transformIndent(depth[-1].logicalFollower)
             elif '}' in memory:
                 finishIndent(depth[-1].logicalPreceding)
     
