@@ -224,7 +224,7 @@ def add_credits(html):
 def remove_space(code):
     return re_sub(r"^[^\S\r\n]+", "", code, flags=re_m_flag)
 
-def from_file(input_path, output_path, *_, credits=False, border_radius=15, functions_always_in_class=True):
+def from_file(input_path, output_path, *_, credits=True, border_radius=15, functions_always_in_class=True):
     code = ""
     with open(input_path, "r") as file:
         code = file.read()
