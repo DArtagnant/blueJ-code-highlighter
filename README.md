@@ -52,6 +52,12 @@ will read a file named `input.txt` and located in the current directory and writ
 * `functions_always_in_class` when `True`, allows to render uncomplete code with a class indentation. _You should not mix uncomplete code and classes._ default `True`
 * `credits` when `False` allows to mask the credits at the bottom of the render. Please read _About BlueJ-code-highlighter_. If you disable this option, you have to mention the formatter source (link to the github page) and author's name (DArtagnant) somewhere in the page in accordance with the free license chosen for this project. default `True`
 
+Example :
+
+```python
+from_file("input.txt", "output.html", credits=True, border_radius=20, functions_always_in_class=False)
+```
+
 ## Contributing
 
 Feel free to open a github issue, I will reply as soon as possible.
