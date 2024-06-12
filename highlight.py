@@ -256,4 +256,4 @@ def from_file(input_path, output_path, *_, credits=True, border_radius=15, funct
         file.write(result_html)
 
 if __name__ == "__main__":
-    from_file("input.txt", "output.html", change_escape_char=True)
+    from_file("input.txt", "output.html")
