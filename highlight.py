@@ -193,10 +193,12 @@ def add_filters(lexer):
     lexer.add_filter(SpecialKeywordFilter())
     return lexer
 
-def format_code(code, *_, functions_always_in_class=False):
+def format_code(code, *_, functions_always_in_class=False, formatter_class=None):
+    if formatter_class is None:
+        formatter_class = HtmlFormatter
     lexer = JavaLexer()
     lexer = add_filters(lexer)
-    formatter = HtmlFormatter(noclasses=True, style=BlueJStyle)
+    formatter = formatter_class(noclasses=True, style=BlueJStyle)
     tokens = list(lexer.get_tokens(code))
     return parseFromToken(tokens, formatter, functions_always_in_class=functions_always_in_class)
 
@@ -224,15 +226,24 @@ def add_credits(html):
 def remove_space(code):
     return re_sub(r"^[^\S\r\n]+", "", code, flags=re_m_flag)
 
-def from_file(input_path, output_path, *_, credits=True, border_radius=15, functions_always_in_class=True):
+def from_file(input_path, output_path, *_, credits=True, border_radius=15, functions_always_in_class=True, change_escape_char=False):
     code = ""
     with open(input_path, "r") as file:
         code = file.read()
     code = remove_space(code)
+    formatter_class = None
+    if change_escape_char:
+        try:
+            from change_escape import HtmlFormatterSpecialEscape
+            formatter_class = HtmlFormatterSpecialEscape
+            print("special escape loaded.")
+        except:
+            print("WARNING: unable to load special escape, maybe the private implementation of HtmlFormatter have changed")
     result_html = add_container(
         format_code(
             code,
             functions_always_in_class= functions_always_in_class,
+            formatter_class= formatter_class,
             ),
         border_radius=border_radius
         )
@@ -245,4 +256,4 @@ def from_file(input_path, output_path, *_, credits=True, border_radius=15, funct
         file.write(result_html)
 
 if __name__ == "__main__":
-    from_file("input.txt", "output.html")
+    from_file("input.txt", "output.html", change_escape_char=True)
