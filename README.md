@@ -50,6 +50,7 @@ will read a file named `input.txt` and located in the current directory and writ
 
 * `border_radius` set the radius of the rounded corners of the output. default 15.
 * `functions_always_in_class` when `True`, allows to render uncomplete code with a class indentation. _You should not mix uncomplete code and classes._ default `True`
+* `change_escape_char` when `True`, allows to use classical characters for `&`, `<`, `>`, `"` and `'` instead of an encoding like `&quot;` for `"`. This functionality is based on a specific private implementation of pygments `HtmlFormatter` and may not work in newer versions. default `False`
 * `credits` when `False` allows to mask the credits at the bottom of the render. Please read _About BlueJ-code-highlighter_. If you disable this option, you have to mention the formatter source (link to the github page) and author's name (DArtagnant) somewhere in the page in accordance with the free license chosen for this project. default `True`
 
 Example :
