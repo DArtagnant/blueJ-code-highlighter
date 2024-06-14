@@ -251,9 +251,12 @@ def from_file(input_path, output_path, *_, credits=True, border_radius=15, funct
         result_html = add_credits(result_html)
     else:
         print("PLEASE ADD THE FORMATTER SOURCE AND AUTHOR'S NAME")
-    print("Export terminé")
+    print("Export completed.")
     with open(output_path, 'w') as file:
         file.write(result_html)
 
+def simple_apply(*args, **kwrgs):
+    from_file("input.txt", "output.html", *args, change_escape_char=True, **kwrgs)
+
 if __name__ == "__main__":
-    from_file("input.txt", "output.html")
+    simple_apply()
