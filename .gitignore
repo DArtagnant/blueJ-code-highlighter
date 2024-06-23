@@ -163,3 +163,4 @@ input*.txt
 output*.html
 test*.html
 test*.py
+test
