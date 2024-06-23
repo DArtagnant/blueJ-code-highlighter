@@ -164,3 +164,4 @@ output*.html
 test*.html
 test*.py
 test
+setup.py
