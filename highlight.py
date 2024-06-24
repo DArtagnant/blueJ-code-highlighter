@@ -108,20 +108,20 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
         if functions_always_in_class:
             if (beforeZone is Zones.funHeader and
                 Zones.classBody not in depth):
-                print("WARNING : The given code seems incomplete, "
-                      + "a class indentation has been added to the isolated functions. "
-                      + "Do not mix incomplete code with classes.")
+                print("ATTENTION : Le code donné semble incomplet, "
+                      + "une indentation de classe a été ajoutée aux fonctions isolées. "
+                      + "Ne mélangez pas du code incomplet avec des classes.")
                 depth.append(Zones.classBody)
         
         if (beforeZone is Zones.classHeader and
             Zones.classBody in depth):
-            print("WARNING: there is a class inside a another class")
+            print("ATTENTION : il y a une classe à l'intérieur d'une autre classe")
         if (beforeZone is Zones.classHeader and
             Zones.funBody in depth):
-            print("WARNING: there is a class inside a function")
+            print("ATTENTION : il y a une classe à l'intérieur d'une fonction")
         if (beforeZone is Zones.funHeader and
             Zones.funBody in depth):
-            print("WARNING: there is a function inside a another function")
+            print("ATTENTION : il y a une fonction à l'intérieur d'une autre fonction")
         
         depth[-1] = depth[-1].logicalFollower
         depth.append(beforeZone)
@@ -135,7 +135,7 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
     def finishIndent(makeZone):
         nonlocal depth
         if not len(depth) > 1:
-            raise Exception('unfinished group')
+            raise Exception('groupe inachevé')
         transformIndent(makeZone)
         depth.pop()
 
@@ -166,7 +166,7 @@ def parseFromToken(tokens, formatter, *_, functions_always_in_class=False):
                     else:
                         createIndent(Zones.funHeader)
                 else:
-                    raise Exception("Unknown block {")
+                    raise Exception("Bloc inconnu {")
             elif ';' in memory:
                 transformIndent(depth[-1].logicalFollower)
             elif '}' in memory:
@@ -236,9 +236,9 @@ def from_file(input_path, output_path, *_, credits=True, border_radius=15, funct
         try:
             from change_escape import HtmlFormatterSpecialEscape
             formatter_class = HtmlFormatterSpecialEscape
-            print("special escape loaded.")
+            print("échappement spécial des caractères spéciaux chargé.")
         except:
-            print("WARNING: unable to load special escape, maybe the private implementation of HtmlFormatter have changed")
+            print("WARNING : incapable de charger l'échappement spécial des caractères spéciaux, peut-être que l'implémentation privée de HtmlFormatter a changé")
     result_html = add_container(
         format_code(
             code,
@@ -250,8 +250,8 @@ def from_file(input_path, output_path, *_, credits=True, border_radius=15, funct
     if credits:
         result_html = add_credits(result_html)
     else:
-        print("PLEASE ADD THE FORMATTER SOURCE AND AUTHOR'S NAME")
-    print("Export completed.")
+        print("MERCI D'AJOUTER LA SOURCE DU FORMATEUR ET LE NOM DE L'AUTEUR")
+    print("Exportation terminée.")
     with open(output_path, 'w') as file:
         file.write(result_html)
 
