@@ -1,8 +1,5 @@
-from collections.abc import Iterator
-from typing import Iterable
-from pygments.lexer import Lexer
 from pygments.style import Style
-from pygments.token import _TokenType, Token, Comment, Keyword, String, Name
+from pygments.token import Token, Comment, Keyword, String, Name
 from pygments.filter import Filter
 
 class BlueJStyle(Style):
