@@ -30,6 +30,10 @@ class MainGui(tk.Tk):
         self.source_file = None
         self.output_dir = None
 
+        self.change_escape_char = True
+        self.functions_always_in_class = False
+        self.credits = True
+
         self.frames = {}
         for cls_frame in (MainPage,):
             frame = cls_frame(container, self)
@@ -47,15 +51,14 @@ class MainGui(tk.Tk):
         return self.source_file is not None and self.output_dir is not None
     
     def select_source_file(self, *, then_rebuild):
-        given_path = filedialog.askopenfilename(title="Choisir un fichier source")
+        given_path = filedialog.askopenfilename(title="Choisir un fichier source", filetypes=[("Java Files", "*.java")])
         if given_path != "" and path.exists(given_path):
             self.source_file = given_path
             print(f"fichier source sélectionné : '{self.source_file}'")
         else:
             self.source_file = None
             print("fichier incorrect.")
-        for frame in then_rebuild:
-            frame.build()
+        self.call_rebuild(then_rebuild)
     
     def select_output_dir(self, *, then_rebuild):
         given_path = filedialog.askdirectory(title="Choisir un dossier destination")
@@ -65,21 +68,39 @@ class MainGui(tk.Tk):
         else:
             self.output_dir = None
             print("dossier incorrect.")
-        for frame in then_rebuild:
-            frame.build()
+        self.call_rebuild(then_rebuild)
     
     def convert_file(self, *, then_rebuild):
         if self.ready_to_convert:
             output_file = path.join(self.output_dir, f"{path.splitext(path.basename(self.source_file))[0]}.html") # type: ignore
             print(f"début de la conversion, le fichier html créé se trouvera à : '{output_file}'")
             try:
-                highlight_from_file(self.source_file, output_file)
+                highlight_from_file(
+                    self.source_file,
+                    output_file,
+                    change_escape_char=self.change_escape_char,
+                    functions_always_in_class=self.functions_always_in_class,
+                    credits=self.credits,
+                    )
             except Exception as e:
                 print("Une erreur s'est produite lors de la conversion. N'hésitez pas à ouvrir une issue github.")
                 print_exception(e)
                 print("N'hésitez pas à ouvrir une issue github, voir ci-dessous")
             else:
                 open_in_browser(output_file)
+
+    def call_rebuild(self, rebuild):
+        for frame in rebuild:
+            frame.build()
+
+    def more_parameters(self, *, then_rebuild):
+        root = tk.Toplevel(self)
+        root.geometry("200x150")
+        root.resizable(height = None, width = None)
+        MoreParameters(root, self).pack(
+            fill='both',
+            expand=True,
+        )
 
 
 class MainPage(tk.Frame):
@@ -112,12 +133,11 @@ class MainPage(tk.Frame):
         )
         self.button_line.pack(side='top', fill='x')
 
-        self.convert_file_button = tk.Button(
+        self.convert_line = ConvertLine(
             self,
-            text= "Convertir",
-            command=lambda: controller.convert_file(then_rebuild=(self, self.button_line)),
+            self.controller,
         )
-        self.convert_file_button.pack(side='top', fill='x')
+        self.convert_line.pack(side='top', fill='x')
 
         self.text_console = tk.Text(self, wrap='word', height=20, width=80)
         self.text_console.bind("<Key>", lambda e: read_only_except_ctrlca(e))
@@ -128,7 +148,7 @@ class MainPage(tk.Frame):
         self.build()
     
     def build(self):
-        self.convert_file_button.config(state= 'normal' if self.controller.ready_to_convert else 'disabled')
+        pass
 
 class ButtonLine(tk.Frame):
     def __init__(self, parent, controller: MainGui):
@@ -137,7 +157,7 @@ class ButtonLine(tk.Frame):
 
         self.select_file_button = tk.Button(
             self,
-            command=lambda: controller.select_source_file(then_rebuild=(self, parent)),
+            command=lambda: controller.select_source_file(then_rebuild=(self, parent.convert_line)),
         )
         self.select_file_button.pack(side='left', fill='both')
 
@@ -154,7 +174,7 @@ class ButtonLine(tk.Frame):
 
         self.select_output_button = tk.Button(
             self,
-            command=lambda: controller.select_output_dir(then_rebuild=(self, parent)),
+            command=lambda: controller.select_output_dir(then_rebuild=(self, parent.convert_line)),
         )
         self.select_output_button.pack(side='right', fill='both')
 
@@ -173,6 +193,114 @@ class ButtonLine(tk.Frame):
             text = "Sélectionner un dossier d'export"
         self.select_output_button.config(text=text)
 
+class ConvertLine(tk.Frame):
+    def __init__(self, parent, controller: MainGui):
+        super().__init__(parent)
+        self.controller = controller
+
+        self.convert_file_button = tk.Button(
+            self,
+            text= "Convertir",
+            command=lambda: controller.convert_file(then_rebuild=()),
+        )
+        self.convert_file_button.pack(
+            side='left',
+            fill='x',
+            expand=True,    
+        )
+
+        self.more_parameters_button = tk.Button(
+            self,
+            text= "options",
+            command=lambda: controller.more_parameters(then_rebuild=())
+        )
+        self.more_parameters_button.pack(
+            side='right',
+            fill='x',
+        )
+
+        self.build()
+
+    def build(self):
+        self.convert_file_button.config(state= 'normal' if self.controller.ready_to_convert else 'disabled')
+
+class MoreParameters(tk.Frame):
+    def __init__(self, parent, controller: MainGui):
+        super().__init__(parent)
+        self.controller = controller
+
+        self.title_label = tk.Label(
+            self,
+            text="Paramètres avancés",
+        )
+        self.title_label.grid(
+            row=0,
+            column=0,
+            sticky='we',
+        )
+        self.title_label.grid_columnconfigure(0, weight=1)
+
+        def _switch_change_escape_char():
+            self.controller.change_escape_char = not self.controller.change_escape_char
+        self.change_escape_char_button = tk.Checkbutton(
+            self,
+            text="change escape char",
+            command=_switch_change_escape_char,
+        )
+        self.change_escape_char_button.grid(
+            row=1,
+            column=0,
+            sticky='w',
+        )
+        if self.controller.change_escape_char:
+            self.change_escape_char_button.select()
+
+        def _switch_functions_always_in_class():
+            self.controller.functions_always_in_class = not self.controller.functions_always_in_class
+        self.functions_always_in_class_button = tk.Checkbutton(
+            self,
+            text="functions always in class",
+            command=_switch_functions_always_in_class,
+        )
+        self.functions_always_in_class_button.grid(
+            row=2,
+            column=0,
+            sticky='w',
+        )
+        if self.controller.functions_always_in_class:
+            self.functions_always_in_class_button.select()
+
+        def _switch_credits():
+            self.controller.credits = not self.controller.credits
+        self.credits_button = tk.Checkbutton(
+            self,
+            text="credits",
+            command=_switch_credits,
+        )
+        self.credits_button.grid(
+            row=3,
+            column=0,
+            sticky='w',
+        )
+        if self.controller.credits:
+            self.credits_button.select()
+
+        self.credits_text = tk.Label(
+            self,
+            text="merci d'ajouter vous-même la source du formateur et le nom de l'auteur",
+            wraplength=180,
+            justify='left'
+        )
+        self.credits_text.grid(
+            row=4,
+            column=0,
+            sticky='w',
+            padx=10,
+            pady=(0, 10)
+        )
+
+    def build(self):
+        pass
 
 class RedirectText:
     def __init__(self, widget):

@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 input*.txt
+input*.java
 output*.html
 test*.html
 test*.py
