@@ -30,8 +30,8 @@ class MainGui(tk.Tk):
         self.source_file = None
         self.output_dir = None
 
-        self.change_escape_char = True
-        self.functions_always_in_class = False
+        self.change_escape_char = False
+        self.functions_always_in_class = True
         self.credits = True
 
         self.frames = {}
