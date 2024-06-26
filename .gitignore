@@ -166,3 +166,4 @@ test*.html
 test*.py
 test
 setup.py
+*.spec
