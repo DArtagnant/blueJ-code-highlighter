@@ -95,7 +95,7 @@ class MainGui(tk.Tk):
 
     def more_parameters(self, *, then_rebuild):
         root = tk.Toplevel(self)
-        root.geometry("200x150")
+        root.geometry("200x175")
         root.resizable(height = None, width = None)
         MoreParameters(root, self).pack(
             fill='both',
@@ -287,7 +287,8 @@ class MoreParameters(tk.Frame):
 
         self.credits_text = tk.Label(
             self,
-            text="merci d'ajouter vous-même la source du formateur et le nom de l'auteur",
+            text= ("Merci d'ajouter vous-même la source du formateur et le nom de l'auteur si vous décochez l'option credits."
+                   "\nCode sous licence GPL"),
             wraplength=180,
             justify='left'
         )
