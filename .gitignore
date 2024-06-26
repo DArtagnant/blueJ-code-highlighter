@@ -167,3 +167,6 @@ test*.py
 test
 setup.py
 *.spec
+dist/**
+build/**
+output_build.txt
