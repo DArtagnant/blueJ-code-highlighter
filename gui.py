@@ -95,7 +95,7 @@ class MainGui(tk.Tk):
 
     def more_parameters(self, *, then_rebuild):
         root = tk.Toplevel(self)
-        root.geometry("200x175")
+        root.geometry("200x180")
         root.resizable(height = None, width = None)
         MoreParameters(root, self).pack(
             fill='both',
