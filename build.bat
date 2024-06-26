@@ -2,7 +2,7 @@
 setlocal
 
 echo execution de pyinstaller...
-pyinstaller --onefile --noconsole ".\gui.py" > output_build.txt 2>&1
+pyinstaller --name "BlueJ-code-highlighter" --specpath ".\build" --onefile --noconsole ".\gui.py" > output_build.txt 2>&1
 
 findstr "error: (225," output.txt > nul
 if %errorlevel% equ 0 (
@@ -12,6 +12,7 @@ if %errorlevel% equ 0 (
     powershell -command "Start-Process 'windowsdefender://threatsettings'"
 ) else (
     echo compilation terminee, execution
+    explorer .\dist\
     .\dist\gui.exe
 )
 del output_build.txt
