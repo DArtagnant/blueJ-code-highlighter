@@ -63,6 +63,10 @@ from_file("input.txt", "output.html", credits=True, border_radius=20, functions_
 
 Feel free to open a github issue, I will reply as soon as possible.
 
+## Building
+
+Run `build.bat` to build the GUI into a .exe
+
 ## About _BlueJ-code-highlighter_
 
 This project was originally a utility code written by DArtagnant as a favor to a friend.
